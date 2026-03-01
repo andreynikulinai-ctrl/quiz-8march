@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Кто этот мужчина? — 8 Марта</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --rose:  #d4506b;
+  --blush: #f9e4ea;
+  --cream: #fdf7f2;
+  --gold:  #c9893a;
+  --dark:  #1c0f14;
+  --text:  #fdf0f4;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'Jost', sans-serif;
+  background: var(--dark);
+  color: var(--text);
+  min-height: 100vh;
+  overflow: hidden;
+  position: relative;
+}
+
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background:
+    radial-gradient(ellipse 60% 50% at 20% 80%, rgba(180,40,70,0.18) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 60% at 80% 20%, rgba(140,30,60,0.15) 0%, transparent 70%),
+    radial-gradient(ellipse 80% 40% at 50% 100%, rgba(100,20,40,0.25) 0%, transparent 60%);
+  pointer-events:none; z-index:0;
+}
+
+/* ── ЭКРАНЫ ── */
+.screen {
+  position:fixed; inset:0;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  padding:32px 48px;
+  z-index:10;
+  opacity:0; pointer-events:none;
+  transition:opacity 0.6s ease;
+}
+.screen.active { opacity:1; pointer-events:all; }
+
+/* ── ТЮЛЬПАНЫ ── */
+.tulip-deco {
+  position:fixed; bottom:-10px;
+  pointer-events:none; z-index:1;
+}
+.tulip-deco.left  { left:-10px; }
+.tulip-deco.right { right:-10px; transform:scaleX(-1); }
+
+/* ── ЛЕПЕСТКИ ── */
+.petal-fall {
+  position:fixed; pointer-events:none; z-index:2;
+  border-radius:60% 10% 60% 10%;
+  opacity:0;
+  animation: petalDrift linear infinite;
+}
+@keyframes petalDrift {
+  0%   { transform:translateY(-40px) translateX(0px) rotate(0deg);   opacity:0; }
+  8%   { opacity:0.5; }
+  85%  { opacity:0.3; }
+  100% { transform:translateY(105vh) translateX(35px) rotate(280deg); opacity:0; }
+}
+
+/* ════════════════════
+   ИНТРО
+════════════════════ */
+#screen-intro { gap:18px; text-align:center; }
+
+.intro-eyebrow {
+  font-size:11px; letter-spacing:5px; text-transform:uppercase;
+  color:var(--rose); font-weight:500;
+}
+.intro-title {
+  font-family:'Cormorant Garamond', serif;
+  font-size:clamp(52px, 9vw, 108px);
+  font-style:italic; line-height:0.92;
+  color:var(--cream);
+}
+.intro-title em { color:var(--rose); }
+
+.intro-divider {
+  display:flex; align-items:center; gap:16px;
+  color:rgba(253,240,244,0.35); font-size:13px; letter-spacing:2px;
+}
+.intro-divider::before,
+.intro-divider::after {
+  content:''; flex:1; height:1px;
+  background:linear-gradient(90deg, transparent, rgba(212,80,107,0.4), transparent);
+}
+
+.intro-sub {
+  font-size:14px; color:rgba(253,240,244,0.45);
+  font-weight:300; letter-spacing:1.5px;
+}
+
+.dots-row { display:flex; gap:7px; justify-content:center; margin:4px 0; }
+.dot {
+  width:9px; height:9px; border-radius:50%;
+  background:rgba(212,80,107,0.2);
+  border:1px solid rgba(212,80,107,0.35);
+  transition:all 0.4s;
+}
+.dot.done { background:var(--rose); border-color:var(--rose); }
+
+/* ════════════════════
+   РАУНД
+════════════════════ */
+#screen-round {
+  justify-content:space-between;
+  padding:28px 48px 32px;
+}
+
+.round-topbar {
+  display:flex; align-items:center; justify-content:space-between;
+  width:100%; max-width:960px;
+}
+.round-label {
+  font-size:11px; letter-spacing:3px; text-transform:uppercase;
+  color:rgba(253,240,244,0.35);
+}
+.pts-pill {
+  display:flex; align-items:center; gap:6px;
+  background:rgba(201,137,58,0.13);
+  border:1px solid rgba(201,137,58,0.28);
+  border-radius:20px; padding:5px 15px;
+  font-size:12px; color:var(--gold); font-weight:600; letter-spacing:1px;
+}
+
+.progress-bar {
+  width:100%; max-width:960px;
+  height:2px; border-radius:2px;
+  background:rgba(255,255,255,0.05); overflow:hidden;
+}
+.progress-fill {
+  height:100%;
+  background:linear-gradient(90deg, var(--rose), var(--gold));
+  border-radius:2px; transition:width 0.5s ease;
+}
+
+.center-zone {
+  display:flex; align-items:center; gap:72px;
+  width:100%; max-width:960px;
+  flex:1; justify-content:center; padding:16px 0;
+}
+
+/* ── ГЕРОЙ ── */
+.hero-wrap {
+  position:relative; flex-shrink:0;
+  width:200px; height:260px;
+}
+
+/* Загадочная рамка */
+.hero-mystery {
+  position:absolute; inset:0;
+  display:flex; align-items:center; justify-content:center;
+  transition:opacity 0.7s ease;
+}
+.mystery-frame {
+  width:180px; height:220px;
+  border:2px solid rgba(212,80,107,0.3);
+  border-radius:16px;
+  display:flex; align-items:center; justify-content:center;
+  background:rgba(212,80,107,0.06);
+  position:relative;
+  box-shadow: inset 0 0 40px rgba(212,80,107,0.08), 0 0 40px rgba(212,80,107,0.06);
+}
+.mystery-frame::before {
+  content:'';
+  position:absolute; inset:7px;
+  border:1px solid rgba(212,80,107,0.12);
+  border-radius:10px;
+}
+.mystery-q {
+  font-family:'Cormorant Garamond', serif;
+  font-size:108px; font-style:italic; line-height:1;
+  color:rgba(212,80,107,0.5);
+  text-shadow:0 0 50px rgba(212,80,107,0.35);
+  user-select:none;
+  animation: qPulse 3s ease-in-out infinite;
+}
+@keyframes qPulse {
+  0%,100% { opacity:0.55; transform:scale(1); }
+  50%      { opacity:0.85; transform:scale(1.03); }
+}
+
+.corner-tulip {
+  position:absolute; font-size:15px; line-height:1;
+}
+.corner-tulip.tl { top:7px;  left:10px;  animation:csway 4s ease-in-out infinite alternate; }
+.corner-tulip.tr { top:7px;  right:10px; animation:csway 4s ease-in-out infinite alternate-reverse; }
+.corner-tulip.bl { bottom:7px; left:10px;  animation:csway 4s ease-in-out infinite alternate; }
+.corner-tulip.br { bottom:7px; right:10px; animation:csway 4s ease-in-out infinite alternate-reverse; }
+@keyframes csway {
+  from { transform:rotate(-5deg); }
+  to   { transform:rotate(5deg);  }
+}
+
+/* Фото актёра */
+.hero-photo {
+  position:absolute; inset:0;
+  width:100%; height:100%;
+  object-fit:cover; border-radius:14px;
+  opacity:0; transition:opacity 0.9s ease;
+  box-shadow:0 24px 64px rgba(212,80,107,0.28), 0 0 0 1px rgba(212,80,107,0.2);
+}
+
+/* ── ИМЯ АКТЁРА — подложка поверх фото ── */
+.hero-name-tag {
+  position:absolute;
+  bottom:0; left:0; right:0;
+  border-radius:0 0 14px 14px;
+  padding:28px 14px 14px;
+  background: linear-gradient(to top, rgba(28,10,20,0.92) 60%, transparent 100%);
+  text-align:center;
+  opacity:0;
+  transition:opacity 0.7s ease 0.5s;
+}
+.hero-name-tag span {
+  font-family:'Cormorant Garamond', serif;
+  font-size:18px; font-style:italic;
+  color:#fff;
+  text-shadow: 0 1px 8px rgba(0,0,0,0.8);
+  line-height:1.3;
+  display:block;
+}
+
+.hero-wrap.revealed .hero-mystery  { opacity:0; pointer-events:none; }
+.hero-wrap.revealed .hero-photo    { opacity:1; }
+.hero-wrap.revealed .hero-name-tag { opacity:1; }
+
+/* ── ВОПРОС ── */
+.q-block { flex:1; max-width:480px; display:flex; flex-direction:column; gap:22px; }
+
+.q-type {
+  font-size:10px; letter-spacing:4px; text-transform:uppercase;
+  color:var(--rose); font-weight:600;
+}
+.q-text {
+  font-family:'Cormorant Garamond', serif;
+  font-size:clamp(20px, 2.6vw, 28px);
+  line-height:1.52; color:var(--cream);
+}
+.q-text.is-quote {
+  font-style:italic;
+  font-size:clamp(22px, 3vw, 32px);
+  color:var(--blush);
+  border-left:3px solid var(--rose);
+  padding-left:20px;
+}
+
+/* ── ТАЙМЕР ── */
+.timer-row { display:flex; align-items:center; gap:16px; }
+.timer-ring {
+  position:relative; width:54px; height:54px; flex-shrink:0;
+}
+.timer-ring svg { transform:rotate(-90deg); width:100%; height:100%; }
+.timer-ring circle { fill:none; stroke-width:3; }
+.t-bg  { stroke:rgba(212,80,107,0.12); }
+.t-arc {
+  stroke:var(--rose);
+  stroke-dasharray:138.2; stroke-dashoffset:0;
+  transition:stroke-dashoffset 1s linear;
+  stroke-linecap:round;
+}
+.t-num {
+  position:absolute; inset:0;
+  display:flex; align-items:center; justify-content:center;
+  font-size:18px; font-weight:600; color:var(--cream);
+}
+.timer-ring.urgent .t-arc { stroke:#ff3355; }
+.timer-ring.urgent .t-num { color:#ff3355; }
+.timer-hint { font-size:12px; color:rgba(253,240,244,0.35); font-weight:300; }
+
+/* ── КНОПКИ ── */
+.btn-row {
+  display:flex; gap:12px; flex-wrap:wrap;
+  width:100%; max-width:960px; justify-content:center;
+}
+.btn {
+  padding:13px 26px; border:none; border-radius:8px;
+  font-family:'Jost', sans-serif; font-size:14px;
+  font-weight:500; letter-spacing:0.5px; cursor:pointer;
+  transition:all 0.2s ease; white-space:nowrap;
+}
+.btn-main {
+  background:var(--rose); color:#fff;
+  box-shadow:0 8px 28px rgba(212,80,107,0.32);
+}
+.btn-main:hover { transform:translateY(-2px); box-shadow:0 14px 36px rgba(212,80,107,0.42); }
+.btn-ghost {
+  background:transparent; color:var(--text);
+  border:1px solid rgba(253,240,244,0.2);
+}
+.btn-ghost:hover { border-color:rgba(253,240,244,0.45); background:rgba(253,240,244,0.05); }
+.btn-next {
+  background:linear-gradient(135deg, var(--gold), #e0a550);
+  color:#1c0f14; font-weight:600;
+  box-shadow:0 8px 28px rgba(201,137,58,0.28);
+}
+.btn-next:hover { transform:translateY(-2px); }
+
+/* ════════════════════
+   ФИНАЛ
+════════════════════ */
+#screen-final { gap:26px; text-align:center; }
+
+.final-flowers {
+  font-size:38px; letter-spacing:8px;
+  animation:floatF 2.5s ease-in-out infinite alternate;
+}
+@keyframes floatF {
+  from { transform:translateY(-6px); }
+  to   { transform:translateY(6px);  }
+}
+
+.final-eyebrow {
+  font-size:11px; letter-spacing:5px; text-transform:uppercase;
+  color:var(--rose); font-weight:500;
+}
+.final-title {
+  font-family:'Cormorant Garamond', serif;
+  font-size:clamp(56px, 10vw, 116px);
+  font-style:italic; line-height:0.92; color:var(--cream);
+}
+.final-title em { color:var(--rose); }
+.final-line {
+  width:120px; height:1px; margin:0 auto;
+  background:linear-gradient(90deg, transparent, var(--rose), transparent);
+}
+.final-sub {
+  font-size:clamp(15px, 2vw, 20px);
+  color:rgba(253,240,244,0.55);
+  font-weight:300; letter-spacing:1.5px; max-width:480px;
+}
+
+/* конфетти */
+.conf {
+  position:fixed; pointer-events:none; z-index:200;
+  animation:confFall ease-in forwards;
+}
+@keyframes confFall {
+  0%   { transform:translateY(-80px) rotate(0deg); opacity:1; }
+  100% { transform:translateY(110vh) rotate(640deg); opacity:0; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══ ТЮЛЬПАНЫ СЛЕВА ══ -->
+<div class="tulip-deco left">
+<svg width="230" height="340" viewBox="0 0 230 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M55 335 C53 300 50 258 57 215 C62 188 67 165 65 138" stroke="#5a7a4a" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+  <path d="M61 230 C40 213 25 190 37 168 C49 188 57 210 61 230Z" fill="#6b9455" opacity="0.9"/>
+  <path d="M56 138 C47 124 43 104 51 91 C56 82 65 80 69 88 C76 99 74 121 65 136 Z" fill="#e86078"/>
+  <path d="M65 138 C74 124 78 104 70 91 C65 82 56 80 52 88 C45 99 47 121 56 136 Z" fill="#c84060"/>
+  <ellipse cx="60" cy="136" rx="9" ry="5.5" fill="#a83050" opacity="0.55"/>
+
+  <path d="M108 335 C110 298 106 262 114 225 C119 197 128 174 123 142" stroke="#4e7042" stroke-width="3" stroke-linecap="round" fill="none"/>
+  <path d="M119 248 C141 230 159 208 148 184 C135 205 122 227 119 248Z" fill="#7aaa60" opacity="0.85"/>
+  <path d="M114 142 C104 128 100 106 108 93 C113 83 123 81 127 89 C134 101 131 124 121 140 Z" fill="#f07090"/>
+  <path d="M122 142 C132 128 136 106 128 93 C123 83 113 81 109 89 C102 101 105 124 115 140 Z" fill="#d04565"/>
+  <ellipse cx="118" cy="140" rx="10" ry="5.5" fill="#b03560" opacity="0.5"/>
+
+  <path d="M168 335 C165 302 163 268 170 234 C175 208 182 183 176 155" stroke="#507540" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+  <path d="M173 258 C150 240 136 215 149 191 C162 212 170 236 173 258Z" fill="#6b9455" opacity="0.8"/>
+  <path d="M167 155 C160 144 157 129 163 118 C167 110 174 108 177 116 C181 127 178 145 171 155 Z" fill="#f08098"/>
+  <path d="M173 155 C180 144 183 129 177 118 C173 110 166 108 163 116 C159 127 162 145 169 155 Z" fill="#d85070"/>
+  <ellipse cx="170" cy="154" rx="7.5" ry="4.5" fill="#b04060" opacity="0.5"/>
+</svg>
+</div>
+
+<!-- ══ ТЮЛЬПАНЫ СПРАВА (зеркально) ══ -->
+<div class="tulip-deco right">
+<svg width="230" height="340" viewBox="0 0 230 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M55 335 C53 300 50 258 57 215 C62 188 67 165 65 138" stroke="#5a7a4a" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+  <path d="M61 230 C40 213 25 190 37 168 C49 188 57 210 61 230Z" fill="#6b9455" opacity="0.9"/>
+  <path d="M56 138 C47 124 43 104 51 91 C56 82 65 80 69 88 C76 99 74 121 65 136 Z" fill="#e86078"/>
+  <path d="M65 138 C74 124 78 104 70 91 C65 82 56 80 52 88 C45 99 47 121 56 136 Z" fill="#c84060"/>
+  <ellipse cx="60" cy="136" rx="9" ry="5.5" fill="#a83050" opacity="0.55"/>
+  <path d="M108 335 C110 298 106 262 114 225 C119 197 128 174 123 142" stroke="#4e7042" stroke-width="3" stroke-linecap="round" fill="none"/>
+  <path d="M119 248 C141 230 159 208 148 184 C135 205 122 227 119 248Z" fill="#7aaa60" opacity="0.85"/>
+  <path d="M114 142 C104 128 100 106 108 93 C113 83 123 81 127 89 C134 101 131 124 121 140 Z" fill="#f07090"/>
+  <path d="M122 142 C132 128 136 106 128 93 C123 83 113 81 109 89 C102 101 105 124 115 140 Z" fill="#d04565"/>
+  <ellipse cx="118" cy="140" rx="10" ry="5.5" fill="#b03560" opacity="0.5"/>
+  <path d="M168 335 C165 302 163 268 170 234 C175 208 182 183 176 155" stroke="#507540" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+  <path d="M173 258 C150 240 136 215 149 191 C162 212 170 236 173 258Z" fill="#6b9455" opacity="0.8"/>
+  <path d="M167 155 C160 144 157 129 163 118 C167 110 174 108 177 116 C181 127 178 145 171 155 Z" fill="#f08098"/>
+  <path d="M173 155 C180 144 183 129 177 118 C173 110 166 108 163 116 C159 127 162 145 169 155 Z" fill="#d85070"/>
+  <ellipse cx="170" cy="154" rx="7.5" ry="4.5" fill="#b04060" opacity="0.5"/>
+</svg>
+</div>
+
+<!-- ══ ЛЕПЕСТКИ ══ -->
+<div id="petals"></div>
+
+<!-- ══════════════ ИНТРО ══════════════ -->
+<div class="screen active" id="screen-intro">
+  <div class="intro-eyebrow">Викторина · 8 Марта</div>
+  <div class="intro-title">Кто этот<br><em>мужчина?</em></div>
+  <div class="intro-divider">🌷 10 раундов 🌷</div>
+  <div class="intro-sub">3 подсказки на каждого актёра</div>
+  <div class="dots-row" id="dotsRow"></div>
+  <div class="btn-row" style="margin-top:14px;">
+    <button class="btn btn-main" onclick="startGame()">Начать игру</button>
+  </div>
+</div>
+
+<!-- ══════════════ РАУНД ══════════════ -->
+<div class="screen" id="screen-round">
+  <div class="round-topbar">
+    <div class="round-label">Раунд <span id="roundNum">1</span> / 10</div>
+    <div class="pts-pill">★ <span id="ptsText">3 балла</span></div>
+  </div>
+
+  <div class="progress-bar">
+    <div class="progress-fill" id="progFill" style="width:0%"></div>
+  </div>
+
+  <div class="center-zone">
+    <!-- герой -->
+    <div class="hero-wrap" id="heroWrap">
+      <div class="hero-mystery">
+        <div class="mystery-frame">
+          <span class="corner-tulip tl">🌷</span>
+          <span class="corner-tulip tr">🌷</span>
+          <span class="corner-tulip bl">🌸</span>
+          <span class="corner-tulip br">🌸</span>
+          <span class="mystery-q">?</span>
+        </div>
+      </div>
+      <img class="hero-photo" id="heroPhoto" src="" alt="">
+      <div class="hero-name-tag">
+        <span id="heroName"></span>
+      </div>
+    </div>
+
+    <!-- вопрос -->
+    <div class="q-block">
+      <div class="q-type" id="qType">Факт об актёре</div>
+      <div class="q-text" id="qText"></div>
+      <div class="timer-row">
+        <div class="timer-ring" id="timerRing">
+          <svg viewBox="0 0 48 48">
+            <circle class="t-bg" cx="24" cy="24" r="22"/>
+            <circle class="t-arc" id="tArc" cx="24" cy="24" r="22"/>
+          </svg>
+          <div class="t-num" id="tNum">10</div>
+        </div>
+        <div class="timer-hint">секунд на угадывание</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="btn-row" id="btnRow"></div>
+</div>
+
+<!-- ══════════════ ФИНАЛ ══════════════ -->
+<div class="screen" id="screen-final">
+  <div class="final-flowers">🌷 🌸 🌺</div>
+  <div class="final-eyebrow">8 марта</div>
+  <div class="final-title">С праздником,<br><em>красавицы!</em></div>
+  <div class="final-line"></div>
+  <div class="final-sub">Весны, тепла и только достойных мужчин рядом</div>
+  <div class="btn-row">
+    <button class="btn btn-main" onclick="resetGame()">Сыграть снова</button>
+  </div>
+</div>
+
+<script>
+/* ══ ДАННЫЕ ══ */
+const ROUNDS = [
+  { name:"Данила Козловский",    fact:"В подростковом возрасте учился в Кронштадтском морском кадетском корпусе.",                                                              quote:"«.оновитаропрок ен отэ — мзилоголкА»",           role:"Лицо, принимающее стратегические решения внутри крупной коммерческой структуры.",                             img:"images/kozlovsky.jpg" },
+  { name:"Михаил Пореченков",    fact:"В школьные годы жил и учился в Варшаве.",                                                                                               quote:"«?мяонк оп ,отч уН»",                            role:"Лицо, выполняющее оперативные мероприятия в интересах государства под прикрытием.",                             img:"images/porechenkov.jpg" },
+  { name:"Павел Прилучный",      fact:"Во время съёмок одного из первых крупных фильмов получил перелом ноги, но продолжил работу, и проект стал для него прорывным.",         quote:"«.ёсв тюсаер игьнеД»",                           role:"Лицо, проходящее службу в системе расследования правонарушений и действующее в конфликте с системой.",          img:"images/priluchny.jpg" },
+  { name:"Гоша Куценко",         fact:"Его настоящее имя — Юрий Георгиевич.",                                                                                                 quote:"«.тен — янем ялд А .ястюямен анемерВ»",          role:"Бывшее должностное лицо силовой системы, действующее вне формальных регламентов.",                               img:"images/kutsenko.jpg" },
+  { name:"Владимир Машков",      fact:"В юности был отчислен из театрального училища за участие в драке.",                                                                     quote:"«.янаб ен а ,ксызор йынвологу туТ»",             role:"Руководитель подразделения, осуществляющего выявление и пресечение тяжких преступлений.",                        img:"images/mashkov.jpg" },
+  { name:"Никита Кологривый",    fact:"До актёрской карьеры профессионально занимался боксом и планировал связать жизнь со спортом.",                                          quote:"«.юьтб ен имагон ынацаП»",                       role:"Участник устойчивой подростковой группы с жёсткой иерархией.",                                                  img:"images/kologrivyy.jpg" },
+  { name:"Сергей Безруков",      fact:"Много лет играл исторических и литературных персонажей — от поэтов до священнослужителей.",                                             quote:"«!етсевм медуб ьтачевто ,меалед ым отч ,ёсв аЗ»", role:"Лицо, координирующее деятельность устойчивой группы.",                                                          img:"images/bezrukov.jpg" },
+  { name:"Сергей Бурунов",       fact:"Учился на лётчика-инженера и мечтал о карьере пилота.",                                                                                quote:"«!ьталедирп нерХ юьврууаМ»",                     role:"Должностное лицо, осуществляющее организационно-распорядительные функции в подразделении органа правопорядка.", img:"images/burunov.jpg" },
+  { name:"Александр Петров",     fact:"Родился в Переславле-Залесском.",                                                                                                      quote:"«.окздер ,ядолоВ ,окзреД»",                      role:"Лицо из подростковой среды, вовлечённое в незаконные действия.",                                                 img:"images/petrov.jpg" },
+  { name:"Константин Хабенский", fact:"До актёрской карьеры учился в авиационном техникуме.",                                                                                 quote:"«!акмарсу зи итйыв месВ»",                       role:"Лицо, входящее в закрытую структуру контроля угроз.",                                                            img:"images/khabensky.jpg" },
+];
+
+const QTYPES = [
+  { label:"Факт об актёре",             pts:3, key:"fact",  isQuote:false },
+  { label:"Цитата из роли (зеркально)", pts:2, key:"quote", isQuote:true  },
+  { label:"Описание роли (канцелярит)", pts:1, key:"role",  isQuote:false },
+];
+
+/* ══ СОСТОЯНИЕ ══ */
+let round=0, qIdx=0, tLeft=10, tInt=null, isRevealed=false;
+
+/* ══ ЛЕПЕСТКИ ══ */
+(function(){
+  const c = document.getElementById('petals');
+  const cols = ['#e8607a','#d4506b','#f0a0b0','#f9e4ea','#ffb8c8'];
+  for(let i=0; i<26; i++){
+    const el = document.createElement('div');
+    el.className = 'petal-fall';
+    const sz = 5 + Math.random()*9;
+    el.style.cssText = `
+      width:${sz}px; height:${sz*1.7}px;
+      left:${Math.random()*100}vw;
+      background:${cols[i % cols.length]};
+      animation-duration:${11 + Math.random()*13}s;
+      animation-delay:${Math.random()*20}s;
+    `;
+    c.appendChild(el);
+  }
+})();
+
+/* ══ ТОЧКИ ПРОГРЕССА ══ */
+function buildDots(){
+  const el = document.getElementById('dotsRow');
+  el.innerHTML = '';
+  for(let i=0; i<10; i++){
+    const d = document.createElement('div');
+    d.className = 'dot' + (i < round ? ' done' : '');
+    el.appendChild(d);
+  }
+}
+
+/* ══ ПЕРЕКЛЮЧЕНИЕ ЭКРАНОВ ══ */
+function show(id){
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+/* ══ ЗАПУСК ══ */
+function startGame(){ round = 0; loadRound(); }
+
+function loadRound(){
+  qIdx = 0; isRevealed = false;
+  const r = ROUNDS[round];
+  document.getElementById('roundNum').textContent = round + 1;
+  document.getElementById('progFill').style.width = (round / 10 * 100) + '%';
+  document.getElementById('heroWrap').classList.remove('revealed');
+  document.getElementById('heroPhoto').src = r.img;
+  document.getElementById('heroName').textContent = r.name;
+  show('screen-round');
+  loadQuestion();
+}
+
+function loadQuestion(){
+  isRevealed = false;
+  stopTimer();
+  const qt = QTYPES[qIdx];
+  const r  = ROUNDS[round];
+  document.getElementById('qType').textContent = qt.label;
+  document.getElementById('ptsText').textContent = qt.pts + (qt.pts === 1 ? ' балл' : ' балла');
+  const el = document.getElementById('qText');
+  el.textContent = r[qt.key];
+  el.className = 'q-text' + (qt.isQuote ? ' is-quote' : '');
+  buildBtns('active');
+  startTimer();
+}
+
+function buildBtns(state){
+  const row = document.getElementById('btnRow');
+  row.innerHTML = '';
+  if(state === 'active'){
+    row.appendChild(mkBtn('✓  Угадали — показать героя', 'btn-main', reveal));
+  } else if(state === 'timeout'){
+    if(qIdx < 2)
+      row.appendChild(mkBtn('Следующая подсказка →', 'btn-ghost', ()=>{ qIdx++; loadQuestion(); }));
+    row.appendChild(mkBtn(
+      qIdx < 2 ? '✓  Угадали — показать героя' : 'Раскрыть героя',
+      qIdx < 2 ? 'btn-main' : 'btn-ghost',
+      reveal
+    ));
+  } else if(state === 'revealed'){
+    row.appendChild(mkBtn(
+      round < 9 ? 'Следующий раунд →' : '🌷 Финиш!',
+      'btn-next', nextRound
+    ));
+  }
+}
+
+function mkBtn(txt, cls, fn){
+  const b = document.createElement('button');
+  b.className = 'btn ' + cls;
+  b.textContent = txt;
+  b.onclick = fn;
+  return b;
+}
+
+/* ══ ТАЙМЕР ══ */
+function startTimer(){
+  tLeft = 10;
+  const arc  = document.getElementById('tArc');
+  const num  = document.getElementById('tNum');
+  const ring = document.getElementById('timerRing');
+  arc.style.strokeDashoffset = '0';
+  num.textContent = '10';
+  ring.classList.remove('urgent');
+  tInt = setInterval(()=>{
+    tLeft--;
+    num.textContent = tLeft;
+    arc.style.strokeDashoffset = ((10 - tLeft) / 10 * 138.2) + 'px';
+    if(tLeft <= 3) ring.classList.add('urgent');
+    if(tLeft <= 0){ stopTimer(); if(!isRevealed) buildBtns('timeout'); }
+  }, 1000);
+}
+function stopTimer(){ clearInterval(tInt); tInt = null; }
+
+/* ══ РАСКРЫТИЕ ГЕРОЯ ══ */
+function reveal(){
+  stopTimer();
+  isRevealed = true;
+  document.getElementById('heroWrap').classList.add('revealed');
+  buildBtns('revealed');
+}
+
+function nextRound(){
+  round++;
+  if(round >= 10) showFinal();
+  else loadRound();
+}
+
+/* ══ ФИНАЛ ══ */
+function showFinal(){
+  stopTimer();
+  show('screen-final');
+  document.getElementById('progFill').style.width = '100%';
+  const cols = ['#e8607a','#f9e4ea','#c9893a','#ff8fab','#fff','#d4506b'];
+  for(let i=0; i<90; i++){
+    setTimeout(()=>{
+      const el = document.createElement('div');
+      el.className = 'conf';
+      const sz = 5 + Math.random()*11;
+      el.style.cssText = `
+        left:${Math.random()*100}vw; top:0;
+        width:${sz}px; height:${sz}px;
+        background:${cols[Math.floor(Math.random()*cols.length)]};
+        border-radius:${Math.random() > 0.5 ? '50%' : '2px'};
+        animation-duration:${2.5 + Math.random()*3}s;
+      `;
+      document.body.appendChild(el);
+      setTimeout(()=> el.remove(), 6000);
+    }, i * 55);
+  }
+}
+
+function resetGame(){ round = 0; buildDots(); show('screen-intro'); }
+
+/* ══ ИНИТ ══ */
+buildDots();
+</script>
+</body>
+</html>
